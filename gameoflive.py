@@ -1,18 +1,25 @@
 import sys
 import copy
+import curses
+import time
 
 class GameOfLive:
     def __init__(self, world, rows, cols):
         self.world = world
         self.rows = rows
         self.cols = cols
+        self.win = curses.initscr()
+
+    def __del__(self):
+        #self.win.refresh()
+        curses.endwin()
 
     def play(self, iterations=10):
         self.__printGame()
         while iterations > 0:
             new_world = self.nextGeneration()
             self.world = copy.deepcopy(new_world)
-            self.__printGame()
+            self.__printGameCurses()
             iterations -= 1
 
     def nextGeneration(self):
@@ -61,10 +68,20 @@ class GameOfLive:
         for i in range(self.rows):
             sys.stdout.write('\n')
             for j in range(self.cols):
-                if self.world[i][j]:
+                if self.isAlive(i, j):
                     sys.stdout.write(' # ')
                 else:
                     sys.stdout.write(' . ')
+
+    def __printGameCurses(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if self.isAlive(i, j):
+                    self.win.addstr(i, j, '#')
+                else:
+                    self.win.addstr(i, j, '.')
+        self.win.refresh()
+        time.sleep(1)
 
 world=[
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -72,8 +89,13 @@ world=[
         [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0]
+        [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]
 
 g = GameOfLive(world, len(world), len(world[0]))
-g.play(50)
+g.play(4)
